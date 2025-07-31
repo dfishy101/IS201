@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Snake Game</title>
+  <style>
+    body {
+      background: #111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: white;
+      font-family: sans-serif;
+      flex-direction: column;
+    }
+    canvas {
+      background: #000;
+      border: 2px solid #fff;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="subheader">
+    <a href="scratch.html">Scratch Page</a> |
+    <a href="index.html">Professional Page</a>
+  </div>
+  <h1>Snake Game</h1>
+  <canvas id="game" width="400" height="400"></canvas>
+  <p>
+    Arrow Keys = Move | R = Restart | + = Faster | - = Slower
+  </p>
+
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    const box = 20;
+    const rows = canvas.width / box;
+    const cols = canvas.height / box;
+
+    let snake = [{ x: 9 * box, y: 9 * box }];
+    let direction = "";
+    let food = {
+      x: Math.floor(Math.random() * rows) * box,
+      y: Math.floor(Math.random() * cols) * box
+    };
+
+    let gameOver = false;
+    let speed = 100; // milliseconds between frames (lower = faster)
+    let gameLoop;
+
+    function startGameLoop() {
+      clearInterval(gameLoop);
+      gameLoop = setInterval(draw, speed);
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+      else if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+      else if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+      else if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+      else if (gameOver && e.key.toLowerCase() === "r") location.reload();
+
+      // Speed controls
+      else if (e.key === "+" || e.key === "=") { // plus key
+        if (speed > 30) speed -= 10; // speed up but don't go too fast
+        startGameLoop();
+      }
+      else if (e.key === "-") { // minus key
+        if (speed < 300) speed += 10; // slow down but don't go too slow
+        startGameLoop();
+      }
+    });
+
+    function draw() {
+      if (gameOver) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // draw snake
+      snake.forEach((segment, i) => {
+        ctx.fillStyle = i === 0 ? "lime" : "white";
+        ctx.fillRect(segment.x, segment.y, box, box);
+      });
+
+      // draw food
+      ctx.fillStyle = "red";
+      ctx.fillRect(food.x, food.y, box, box);
+
+      // move snake
+      let head = { ...snake[0] };
+      if (direction === "LEFT") head.x -= box;
+      else if (direction === "RIGHT") head.x += box;
+      else if (direction === "UP") head.y -= box;
+      else if (direction === "DOWN") head.y += box;
+
+      // check for game over
+      if (
+        head.x < 0 || head.y < 0 ||
+        head.x >= canvas.width || head.y >= canvas.height ||
+        snake.slice(1).some(seg => seg.x === head.x && seg.y === head.y)
+      ) {
+        gameOver = true;
+        clearInterval(gameLoop);
+        ctx.fillStyle = "white";
+        ctx.font = "30px Arial";
+        ctx.fillText("Game Over", canvas.width / 2 - 80, canvas.height / 2);
+        ctx.font = "20px Arial";
+        ctx.fillText("Press R to Restart", canvas.width / 2 - 90, canvas.height / 2 + 40);
+        return;
+      }
+
+      // eat food
+      if (head.x === food.x && head.y === food.y) {
+        food = {
+          x: Math.floor(Math.random() * rows) * box,
+          y: Math.floor(Math.random() * cols) * box
+        };
+      } else {
+        snake.pop();
+      }
+
+      snake.unshift(head);
+    }
+
+    // Start the game loop
+    startGameLoop();
+  </script>
+</body>
+</html>
+
+
+    
+    
+    
+    
+    
+    
+    
+    
